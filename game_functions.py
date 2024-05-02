@@ -6,14 +6,14 @@
     9 - Medicine
 '''
 
-def injection(self_item_array: list, opponent_item_array: list, item: str) -> None:
+def injection(self_items: list, opponent_items: list, steal_item: str) -> None:
 
     hasInjection = False
     injection_index = -1
 
     # Check that injection exists
-    for i in range(len(self_item_array)):
-        if self_item_array[i] == "injection":
+    for i in range(len(self_items)):
+        if self_items[i] == "injection":
             hasInjection = True
             injection_index = i
 
@@ -21,15 +21,18 @@ def injection(self_item_array: list, opponent_item_array: list, item: str) -> No
         raise Exception("User does not have injection")
 
 
-    for i in range(len(opponent_item_array)):
-        if opponent_item_array[i] == item:
-            self_item_array.append(item)
-            opponent_item_array.pop(i)
-            self_item_array.pop(injection_index)
+    for i in range(len(opponent_items)):
+        if opponent_items[i] == steal_item:
+            self_items.append(steal_item)
+            opponent_items.pop(i)
+            self_items.pop(injection_index)
             return
 
     # Item not found
-    raise Exception(f"Opponent does not have '{item}'.")
+    raise Exception(f"Opponent does not have '{steal_item}'.")
+
+
+
 
 
 
