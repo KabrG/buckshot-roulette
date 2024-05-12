@@ -1,6 +1,9 @@
 import math
 import random
 
+# from powerup_functions import *
+
+
 # Can be used to check if a player has illegally modified
 class Game:
     def __init__(self, shell_list: list, max_health: int, shell_index: int):
@@ -70,137 +73,15 @@ class GameInfo:
 
         self.turn = p1.turn
 
+        self.my_cuffed = p1.my_cuffed
+        self.opponent_cuffed = p1.opponent_cuffed
 
-class Action:
-    def __init__(self, p1: Player, p2: Player, game: Game):
-        pass # Come back to this
-
-def cigarette(p1: Player, game: Game)->None:
-    is_turn(p1)
-
-    has_cigarette = False
-    cigarette_index = -1
-
-    # Check that player has cigarette
-    for i in range(len(p1.items)):
-        if p1.items[i] == "cigarette":
-            has_cigarette = True
-            cigarette_index = i
-            break
-
-    if has_cigarette and p1.health < game.max_health:
-        p1.items.pop(cigarette_index)
-        p1.health += 1
-
-    elif has_cigarette and not p1.health < game.max_health:
-        # Useless turn, player can not exceed max health
-        p1.items.pop(cigarette_index)
-
-    else:
-        raise Exception("User does not have cigarette")
-
-def handsaw(p1: Player)->None:
-    is_turn(p1)
-    if p1.damage == 2: # handsaw was already used
-        pass
-    elif p1.damage == 1:
-        p1.damage = 2
-    else:
-        raise Exception("Player has a damage attribute that is impossible to obtain")
-
-
-def medicine(p1: Player, game: Game)->None:
-    is_turn(p1)
-    dice_roll = random.randint(0, 100)
-    if dice_roll <= 40 and (p1.health + 2) <= game.max_health:
-        p1.health += 2
-    elif (p1.health + 2) <= game.max_health:
-        pass
-    else:
-        p1.health -= 1
-
-    return
-
-
-def beer(p1: Player, game: Game)->None:
-    is_turn(p1)
-    beer_index = None
-    has_beer = False
-    # Check that player has beer
-    for i in range(len(p1.items)):
-        if p1.items[i] == "beer":
-            has_beer = True
-            beer_index = i
-            break
-
-    # User doesn't have item
-    if not has_beer:
-        raise Exception("User does not have beer")
-
-    # Increment index
-    p1.items.pop(beer_index)
-    game.shell_index += 1
-
-    # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
-
-    return
+        self.num_live = -1
+        self.num_dud = -1
 
 
 
-def injection(p1: Player, p2: Player, steal_item: str)->None:
-    is_turn(p1)
-
-    found_item = False
-    has_injection = False
-    injection_index = -1
-
-    # Check that injection exists
-    for i in range(len(p1.items)):
-        if p1.items[i] == "injection":
-            has_injection = True
-            injection_index = i
-            break
-
-    if not has_injection:
-        raise Exception("User does not have injection")
-
-    # Check if the opponent has the item
-    for i in range(len(p2.items)):
-        if p2.items[i] == steal_item:
-            p2.items.pop(i)
-            p1.items.pop(injection_index)
-            p1.items.append(steal_item)
-            found_item = True
-
-    # Item not found
-    if not found_item:
-        raise Exception(f"Opponent does not have '{steal_item}'.")
-
-    # Use item
-    if steal_item == "injection":
-        raise Exception("You may not use injection to steal injection.")
-    elif steal_item == "cigarette":
-        pass # Add cigarette function
-    elif steal_item == "cell_phone":
-        pass # Add cell_phone function
-    elif steal_item == "magnifying_glass":
-        pass # Add magnifying_glass function
-    elif steal_item == "cuffs":
-        pass # Add cuffs function
-    elif steal_item == "inverter":
-        pass # Add inverter function
-    elif steal_item == "beer":
-        pass # Add beer function
-    elif steal_item == "handsaw":
-        pass # Add handsaw function
-    elif steal_item == "medicine":
-        pass # Add medicine function
-
-    # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
-
-    return
-
-def initialize_game(p1: Player, p2: Player, game: Game)->None:
+def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->None:
     total_shell = random.randint(2, 8)
     shell_list = []
     shell_list[:] = [2]*total_shell
@@ -218,11 +99,6 @@ def initialize_game(p1: Player, p2: Player, game: Game)->None:
     # Shuffle list
     random.shuffle(shell_list)
 
-    # Assign Max Health
-    max_health = random.randint(2, 6)
-    p1.health = max_health
-    p2.health = max_health
-
     # Assign Turn
     if random.randint(0, 1) == 0:
         p1.turn = True
@@ -238,30 +114,30 @@ def initialize_game(p1: Player, p2: Player, game: Game)->None:
 
     # Populate item list
     for i in range(num_items):
-        p1.items.append(item_list[random.randint(0, 8)])
-        p2.items.append(item_list[random.randint(0, 8)])
+        if len(p1.items) < 8:
+            p1.items.append(item_list[random.randint(0, 8)])
+        if len(p2.items) < 8:
+            p2.items.append(item_list[random.randint(0, 8)])
 
     for i in range(total_shell):
         p1.shell_list.append(2)
         p2.shell_list.append(2)
 
-    game.max_health = max_health
-    game.shell_list = shell_list
+    if first_round:
+        # Assign Max Health
+        max_health = random.randint(2, 6)
+
+        p1.health = max_health
+        p2.health = max_health
+
+        game.max_health = max_health
+        game.shell_list = shell_list
 
     return
 
 
 # Called whenever a shell is fired. Checks for winner and swaps turns
-def change_turn(p1: Player, p2: Player, game: Game)->None:
-    update_game_info(p1, p2, game)
-    # Check for winner
-    if p1.health <= 0:
-        print("Player 2 wins")
-        return
-    elif p2.health <= 0:
-        print("Player 1 wins")
-        return
-
+def change_turn(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo, p2_game_info: GameInfo)->int:
     if p1.turn == True and p2.turn == False:
         if p2.my_cuffed is True: # If p2 is cuffed, repeat turn
             p2.my_cuffed = False
@@ -273,17 +149,22 @@ def change_turn(p1: Player, p2: Player, game: Game)->None:
     else:
         raise Exception("Invalid turn assignments.")
 
-    # Check for shell
-    if not game.shell_list: # Empty shell-list
-        # new_round() function here
-        pass
+    update_game_info(p1, p2, game, p1_game_info, p2_game_info)
+    # Check for winner
+    if p1.health <= 0:
+        print(f"{p2.name} wins")
+        return 2
+    elif p2.health <= 0:
+        print(f"{p1.name} wins")
+        return 1
 
-    # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
-
-    return
+    # Check if round ended
 
 
-def fire(p1: Player, p2: Player, game: Game, self_fire=False):
+    return 0
+
+
+def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fire=False):
     shell = game.shell_list
 
     # No shell case
@@ -297,12 +178,15 @@ def fire(p1: Player, p2: Player, game: Game, self_fire=False):
         if shot_fired == 0:
             # Shell is ejected, it is still p1's turn
             game.shell_index += 1
+            print("You shot yourself and it was loaded!")
             pass
 
-        elif shot_fired == 1:
+        elif shot_fired == 1: # p1 shot themselves
             p1.health -= 1
             game.shell_index += 1
-            change_turn(p1, p2, game)
+            change_turn(p1, p2, game, p1_game_info, p2_game_info)
+            print("You shot yourself and it wasn't loaded!")
+
 
         else:
             raise Exception(f"{shot_fired} is an invalid shell in chamber")
@@ -311,22 +195,62 @@ def fire(p1: Player, p2: Player, game: Game, self_fire=False):
     else:
         if shot_fired == 0: # Dud round
             game.shell_index += 1
-            change_turn(p1, p2, game)
+            print("You shot opponent and it wasn't loaded!")
+
         elif shot_fired == 1: # Real round
             p2.health -= 1
             game.shell_index += 1
-            change_turn(p1, p2, game)
+            print("You shot opponent and it was loaded!")
+
         else:
             raise Exception(f"{shot_fired} is an invalid shell in chamber")
 
+        change_turn(p1, p2, game, p1_game_info, p2_game_info)
+
     return
 
-def update_game_info(p1: Player, p2: Player, game: Game):
+def update_game_info(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo, p2_game_info:GameInfo):
+    # Count number of live and dud shells
+    live_shells = 0
+    dud_shells = 0
+    for i in game.shell_index:
+        if i == 0:
+            dud_shells += 1
+        elif i == 1:
+            live_shells += 1
 
-    # Reveal the known shells
+    p1_game_info.num_live = live_shells
+    p1_game_info.num_dud = dud_shells
+
+    # Reveal the known shells, update game info objects
     for i in range(game.shell_index):
-        p1.shell_list[i] = game.shell_list
-        p2.shell_list[i] = game.shell_list
+        p1.shell_list[i] = game.shell_list[i]
+        p2.shell_list[i] = game.shell_list[i]
+
+    p1_game_info.shell_list = game.shell_list
+    p2_game_info.shell_list = game.shell_list
+
+    p1_game_info.max_health = game.max_health
+
+    p1_game_info.my_items = p1.items
+    p1_game_info.opponent_items = p2.items
+    p1_game_info.opponent_items = p2.opponent_cuffed
+    p1_game_info.my_cuffed = p1.my_cuffed
+    p1_game_info.my_health = p1.health
+    p1_game_info.opponent_health_health = p2.health
+    p1_game_info.my_damage = p1.damage
+    p1_game_info.opponent_damage_damage = p2.damage
+
+    p2_game_info.max_health = game.max_health
+
+    p2_game_info.my_items = p2.items
+    p2_game_info.opponent_items = p2.items
+    p2_game_info.opponent_items = p2.opponent_cuffed
+    p2_game_info.my_cuffed = p2.my_cuffed
+    p2_game_info.my_health = p2.health
+    p2_game_info.opponent_health_health = p2.health
+    p2_game_info.my_damage = p2.damage
+    p2_game_info.opponent_damage_damage = p2.damage
 
 
 def print_player_info(p1: Player):
@@ -339,6 +263,7 @@ def print_player_info(p1: Player):
     print("Perceived Shells:", p1.shell_list)
     print("\n")
 
+
 def is_turn(p1: Player):
     if not p1.turn:
         raise Exception(f"It is not {p1.name}'s turn.")
@@ -346,8 +271,23 @@ def is_turn(p1: Player):
         pass
     return
 
-def make_move(game_info: GameInfo, action: Action):
-    return
+def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info: GameInfo, txt_file: str):
+    with open(txt_file) as command_file:
+        for line in command_file:
+            if line == "shoot_opponent":
+                print("hi")
+                fire(p1, p2, game, p1_info, p2_info)
+            elif line == "shoot_self":
+                print("hi3")
+                fire(p1, p2, game, p1_info, p2_info, True)
+            else:
+                print("Invalid command in txt: ", line)
+    # Delete txt contents
+    open(txt_file, 'w').close()
+
+
+    # def make_move(game_info: GameInfo, action: Action):
+#     return
 
 # self.shell = []
 # self.health = health
