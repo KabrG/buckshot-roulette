@@ -58,6 +58,8 @@ class Player:
 
 class GameInfo:
     def __init__(self, p1: Player, p2: Player, game: Game):
+        self.name = p1.name
+
         self.shell_list = p1.shell_list
 
         self.my_health = p1.health
@@ -82,6 +84,7 @@ class GameInfo:
 
 
 def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->None:
+    game.shell_index = 0
     total_shell = random.randint(2, 8)
     shell_list = []
     shell_list[:] = [2]*total_shell
@@ -119,6 +122,10 @@ def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->Non
         if len(p2.items) < 8:
             p2.items.append(item_list[random.randint(0, 8)])
 
+
+    p1.shell_list = []
+    p2.shell_list = []
+
     for i in range(total_shell):
         p1.shell_list.append(2)
         p2.shell_list.append(2)
@@ -131,7 +138,8 @@ def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->Non
         p2.health = max_health
 
         game.max_health = max_health
-        game.shell_list = shell_list
+
+    game.shell_list = shell_list
 
     return
 
@@ -141,15 +149,25 @@ def change_turn(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo, p2_g
     if p1.turn == True and p2.turn == False:
         if p2.my_cuffed is True: # If p2 is cuffed, repeat turn
             p2.my_cuffed = False
+        else:
+            p1.turn = False
+            p2.turn = True
 
     elif p1.turn == False and p2.turn == True:
         if p1.my_cuffed is True: # If p1 is cuffed, repeat turn
             p1.my_cuffed = True
+        else:
+            p1.turn = True
+            p2.turn = False
 
     else:
         raise Exception("Invalid turn assignments.")
 
     update_game_info(p1, p2, game, p1_game_info, p2_game_info)
+
+    return is_winner(p1, p2)
+
+def is_winner(p1: Player, p2: Player):
     # Check for winner
     if p1.health <= 0:
         print(f"{p2.name} wins")
@@ -158,18 +176,16 @@ def change_turn(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo, p2_g
         print(f"{p1.name} wins")
         return 1
 
-    # Check if round ended
-
-
     return 0
-
 
 def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fire=False):
     shell = game.shell_list
 
     # No shell case
-    if not shell:
-        raise Exception("No shells in the chamber.")
+    if game.shell_index == len(game.shell_list):
+        print("No shells in the chamber, returning")
+        return
+        # raise Exception("No shells in the chamber.")
 
     shot_fired = shell[game.shell_index]
 
@@ -178,14 +194,13 @@ def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fi
         if shot_fired == 0:
             # Shell is ejected, it is still p1's turn
             game.shell_index += 1
-            print("You shot yourself and it was loaded!")
-            pass
+            print("You shot yourself and it wasn't loaded!")
 
         elif shot_fired == 1: # p1 shot themselves
             p1.health -= 1
             game.shell_index += 1
             change_turn(p1, p2, game, p1_game_info, p2_game_info)
-            print("You shot yourself and it wasn't loaded!")
+            print("You shot yourself and it was loaded!")
 
 
         else:
@@ -213,7 +228,7 @@ def update_game_info(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo,
     # Count number of live and dud shells
     live_shells = 0
     dud_shells = 0
-    for i in game.shell_index:
+    for i in game.shell_list:
         if i == 0:
             dud_shells += 1
         elif i == 1:
@@ -222,46 +237,61 @@ def update_game_info(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo,
     p1_game_info.num_live = live_shells
     p1_game_info.num_dud = dud_shells
 
+    p2_game_info.num_live = live_shells
+    p2_game_info.num_dud = dud_shells
+
     # Reveal the known shells, update game info objects
     for i in range(game.shell_index):
+        if i == game.shell_index:
+            break
         p1.shell_list[i] = game.shell_list[i]
         p2.shell_list[i] = game.shell_list[i]
 
-    p1_game_info.shell_list = game.shell_list
-    p2_game_info.shell_list = game.shell_list
+    p1_game_info.shell_list = p1.shell_list
+    p2_game_info.shell_list = p2.shell_list
 
     p1_game_info.max_health = game.max_health
 
     p1_game_info.my_items = p1.items
     p1_game_info.opponent_items = p2.items
-    p1_game_info.opponent_items = p2.opponent_cuffed
+    p1_game_info.opponent_cuffed = p2.opponent_cuffed
     p1_game_info.my_cuffed = p1.my_cuffed
     p1_game_info.my_health = p1.health
-    p1_game_info.opponent_health_health = p2.health
+    p1_game_info.opponent_health = p2.health
     p1_game_info.my_damage = p1.damage
-    p1_game_info.opponent_damage_damage = p2.damage
+    p1_game_info.opponent_damage = p2.damage
+    p1_game_info.turn = p1.turn
+    p1_game_info.name = p1.name
 
     p2_game_info.max_health = game.max_health
 
     p2_game_info.my_items = p2.items
-    p2_game_info.opponent_items = p2.items
-    p2_game_info.opponent_items = p2.opponent_cuffed
+    p2_game_info.opponent_items = p1.items
+    p2_game_info.opponent_cuffed = p1.opponent_cuffed
     p2_game_info.my_cuffed = p2.my_cuffed
     p2_game_info.my_health = p2.health
-    p2_game_info.opponent_health_health = p2.health
+    p2_game_info.opponent_health = p1.health
     p2_game_info.my_damage = p2.damage
-    p2_game_info.opponent_damage_damage = p2.damage
+    p2_game_info.opponent_damage = p1.damage
+    p2_game_info.turn = p2.turn
+    p2_game_info.name = p2.name
 
 
-def print_player_info(p1: Player):
-    print(p1.name, "stats:")
-    print("Health:", p1.health)
-    print("Items:", p1.items)
-    print("my_cuffed:", p1.my_cuffed)
-    print("Turn:", p1.turn)
-    print("Damage dealing:", p1.damage)
-    print("Perceived Shells:", p1.shell_list)
-    print("\n")
+def print_player_info(p_info: GameInfo):
+    for i in range(20):
+        print("\n")
+    print(p_info.name, "stats:")
+    print("My Health:", p_info.my_health)
+    print("Opponent Health:", p_info.opponent_health)
+    print("My Items:", p_info.my_items)
+    print("Opponent Items:", p_info.opponent_items)
+    print("My Cuffed Status:", p_info.my_cuffed)
+    print("Opponent Cuffed Status:", p_info.opponent_cuffed)
+    print("My Turn:", p_info.turn)
+    print("My damage:", p_info.my_damage)
+    print("Opponent Damage:", p_info.opponent_damage)
+    print("Perceived Shells:", p_info.shell_list)
+    print(f"{p_info.num_live} live rounds, {p_info.num_dud} dud rounds")
 
 
 def is_turn(p1: Player):
@@ -275,15 +305,24 @@ def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info:
     with open(txt_file) as command_file:
         for line in command_file:
             if line == "shoot_opponent":
-                print("hi")
+                print("shoot opponent processed")
                 fire(p1, p2, game, p1_info, p2_info)
+                if game.shell_index == len(game.shell_list): # No shells left
+                    open(txt_file, 'w').close() # Delete txt contents
+                    return 1
+
             elif line == "shoot_self":
-                print("hi3")
+                print("fire self processed")
                 fire(p1, p2, game, p1_info, p2_info, True)
+                if game.shell_index == len(game.shell_list): # No shells left
+                    print("NO SHELLS LEFT")
+                    open(txt_file, 'w').close() # Delete txt contents
+                    return 1
             else:
                 print("Invalid command in txt: ", line)
     # Delete txt contents
     open(txt_file, 'w').close()
+    return 0
 
 
     # def make_move(game_info: GameInfo, action: Action):
@@ -293,7 +332,7 @@ def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info:
 # self.health = health
 # # self.other_health = other_health
 # self.items = []
-# # self.other_items = []
+# self.other_items = []
 # self.my_cuffed = False
 # self.other_cuffed = False
 # self.damage = 1
