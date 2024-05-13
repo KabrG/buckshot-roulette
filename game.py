@@ -11,18 +11,20 @@ from player_accessible_functions import *
 # Practice function for self-play
 
 def make_move_manual(info: GameInfo, action: Action):
-    print("1. Shoot opponent\n2. Shoot self\n3. Use cigarette")
+    print("1. Shoot opponent\n2. Shoot self\n3. Use cigarette\n4. Use handsaw")
     move = int(input("What is your move?\n"))
 
     if move == 1:
         action.shoot_opponent()
-        print("m1")
+        # print("m1")
     elif move == 2:
         action.shoot_self()
-        print("m2")
+        # print("m2")
     elif move == 3:
         action.use_cigarette()
-        print("m2")
+        # print("m2")
+    elif move == 4:
+        action.use_handsaw()
 
 if __name__ == "__main__":
 

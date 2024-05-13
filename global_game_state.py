@@ -144,6 +144,9 @@ def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->Non
 
 # Called whenever a shell is fired. Checks for winner and swaps turns
 def change_turn(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo, p2_game_info: GameInfo)->int:
+    p1.damage = 1
+    p2.damage = 1
+
     if p1.turn == True and p2.turn == False:
         if p2.my_cuffed is True: # If p2 is cuffed, repeat turn
             p2.my_cuffed = False
@@ -195,7 +198,7 @@ def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fi
             print("You shot yourself and it wasn't loaded!")
 
         elif shot_fired == 1: # p1 shot themselves
-            p1.health -= 1
+            p1.health -= p1.damage
             game.shell_index += 1
             change_turn(p1, p2, game, p1_game_info, p2_game_info)
             print("You shot yourself and it was loaded!")
@@ -211,7 +214,7 @@ def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fi
             print("You shot opponent and it wasn't loaded!")
 
         elif shot_fired == 1: # Real round
-            p2.health -= 1
+            p2.health -= p1.damage
             game.shell_index += 1
             print("You shot opponent and it was loaded!")
 
@@ -316,9 +319,14 @@ def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info:
                     print("NO SHELLS LEFT")
                     open(txt_file, 'w').close() # Delete txt contents
                     return 1
+
             elif line == "use_cigarette":
                 print("use cigarette processed")
                 cigarette(p1, game)
+
+            elif line == "use_handsaw":
+                print("use handsaw processed")
+                handsaw(p1)
 
             else:
                 print("Invalid command in txt: ", line)
@@ -327,11 +335,10 @@ def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info:
     return 0
 
 '''
-#####################################################################
-######################### POWERUP FUNCTIONS #########################
-#####################################################################
+##########################################################################
+##########################  POWERUP FUNCTIONS  ###########################
+##########################################################################
 '''
-
 
 def cigarette(p1: Player, game: Game)->None:
     is_turn(p1)
@@ -358,11 +365,21 @@ def cigarette(p1: Player, game: Game)->None:
         raise Exception("User does not have cigarette")
 
 def handsaw(p1: Player)->None:
+    has_handsaw = False
+    handsaw_index = -1
+    # Check that player has handsaw, pop it
+    for i in range(len(p1.items)):
+        if p1.items[i] == "handsaw":
+            has_handsaw = True
+            handsaw_index = i
+            break
+
     is_turn(p1)
     if p1.damage == 2: # handsaw was already used
         pass
     elif p1.damage == 1:
         p1.damage = 2
+        p1.items.pop(handsaw_index)
     else:
         raise Exception("Player has a damage attribute that is impossible to obtain")
 

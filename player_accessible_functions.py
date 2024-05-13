@@ -32,7 +32,7 @@ class Action:
         return
 
     def use_phone(self)->None:
-        write_to(self.txt_file, "cell_phone")
+        write_to(self.txt_file, "use_cell_phone")
         return
 
     def shoot_self(self)->None:
@@ -40,6 +40,10 @@ class Action:
 
     def shoot_opponent(self)->None:
         write_to(self.txt_file, "shoot_opponent")
+
+    def use_handsaw(self)->None:
+        write_to(self.txt_file, "use_handsaw")
+
 
 
 
