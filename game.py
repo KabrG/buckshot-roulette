@@ -3,6 +3,7 @@ This file runs the operation of the game
 
 '''
 import random
+import os
 
 from global_game_state import *
 from player_accessible_functions import *
@@ -10,8 +11,17 @@ from player_accessible_functions import *
 
 # Practice function for self-play
 
+def delete_command_files():
+    current_directory = os.getcwd()
+    files_in_directory = os.listdir(current_directory)
+
+    for file_name in files_in_directory:
+        if file_name.startswith("command"):
+            file_path = os.path.join(current_directory, file_name)
+            os.remove(file_path)
+
 def make_move_manual(info: GameInfo, action: Action):
-    print("1. Shoot opponent\n2. Shoot self\n3. Use cigarette\n4. Use handsaw")
+    print("1. Shoot opponent\n2. Shoot self\n3. Use cigarette\n4. Use handsaw\n5. Use beer")
     move = int(input("What is your move?\n"))
 
     if move == 1:
@@ -25,8 +35,11 @@ def make_move_manual(info: GameInfo, action: Action):
         # print("m2")
     elif move == 4:
         action.use_handsaw()
+    elif move == 5:
+        action.use_beer()
 
 if __name__ == "__main__":
+    delete_command_files()
 
     p_blue = Player("Kabir", 1, False)
     p_red = Player("Yash", 1, False)
@@ -99,12 +112,12 @@ if __name__ == "__main__":
         win_num = is_winner(p_red, p_blue)
 
         if win_num != 0:
-            print("We have a winner! ")
+            print("We have a winner!")
             exit()
 
         # Check if the round has ended
         if game.shell_index == len(game.shell_list):
-            print("New round! ")
+            print("New round!")
             # break # Remove break later
 
         initialize_game(p_blue, p_red, game, False)
