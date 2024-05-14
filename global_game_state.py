@@ -526,6 +526,23 @@ def injection(p1: Player, p2: Player, steal_item: str)->None:
     # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
     return
 
+def cell_phone(p1: Player, game: Game) -> None:
+    is_turn(p1)
+    b = game.shell_index
+    has_celly = False
+
+    for i in range(len(p1.items)):
+        if p1.items[i] == "cell_phone":
+            has_celly = True
+            p1.items.pop(i)
+
+    if has_celly:
+        info_shell = random.randint(b, len(game.shell_list) - 1)
+        p1.shell_list[info_shell] = game.shell_list[info_shell]
+    else:
+        raise Exception(f"{p1.name} does not have a cell phone.")
+
+
 
 
 
