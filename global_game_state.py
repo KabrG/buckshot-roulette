@@ -58,6 +58,7 @@ class GameInfo:
         self.name = p1.name
 
         self.shell_list = p1.shell_list
+        self.shell_index = -1
 
         self.my_health = p1.health
         self.opponent_health = p2.health
@@ -248,6 +249,9 @@ def update_game_info(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo,
         p1.shell_list[i] = game.shell_list[i]
         p2.shell_list[i] = game.shell_list[i]
 
+    p1_game_info.shell_index = game.shell_index
+    p2_game_info.shell_index = game.shell_index
+
     p1_game_info.shell_list = p1.shell_list
     p2_game_info.shell_list = p2.shell_list
 
@@ -291,7 +295,13 @@ def print_player_info(p_info: GameInfo):
     print("My Turn:", p_info.turn)
     print("My damage:", p_info.my_damage)
     print("Opponent Damage:", p_info.opponent_damage)
-    print("Perceived Shells:", p_info.shell_list)
+    print("Perceived Shells:", end=' ')
+    for i in range(len(p_info.shell_list)):
+        if i == p_info.shell_index:
+            print("|", p_info.shell_list[i], "|", end=' ', sep='')
+        else:
+            print(p_info.shell_list[i], end=' ')
+    print("")
     print(f"{p_info.num_live} live rounds, {p_info.num_dud} dud rounds")
 
 
@@ -335,6 +345,9 @@ def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info:
 
             elif line == "use_pills":
                 pills(p1, game)
+
+            elif line == "use_magnifying_glass":
+                magnifying_glass(p1, game)
 
             else:
                 print("Invalid command in txt: ", line)
@@ -438,7 +451,6 @@ def magnifying_glass(p1: Player, game: Game)->None:
     return
 
 
-
 def beer(p1: Player, game: Game)->None:
     is_turn(p1)
     beer_index = None
@@ -513,8 +525,6 @@ def injection(p1: Player, p2: Player, steal_item: str)->None:
         pass # Add medicine function
     # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
     return
-
-
 
 
 

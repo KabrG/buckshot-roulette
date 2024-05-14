@@ -37,17 +37,22 @@ class Action:
 
     def shoot_self(self)->None:
         write_to(self.txt_file, "shoot_self")
+        return
 
     def shoot_opponent(self)->None:
         write_to(self.txt_file, "shoot_opponent")
+        return
 
     def use_handsaw(self)->None:
         write_to(self.txt_file, "use_handsaw")
+        return
+
+    def use_magnifying_glass(self)->None:
+        write_to(self.txt_file, "use_magnifying_glass")
+        return
 
 
 
 
 
-# p1 = Action("test.txt")
 
-# p1.use_cigarette()

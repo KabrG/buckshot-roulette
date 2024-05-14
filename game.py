@@ -1,15 +1,13 @@
-'''
-This file runs the operation of the game
+# This file runs the operation of the game
 
-'''
 import random
 import os
+import time
 
 from global_game_state import *
 from player_accessible_functions import *
 # from powerup_functions import *
 
-# Practice function for self-play
 
 def delete_command_files():
     current_directory = os.getcwd()
@@ -20,8 +18,10 @@ def delete_command_files():
             file_path = os.path.join(current_directory, file_name)
             os.remove(file_path)
 
+# Practice function for self-play
 def make_move_manual(info: GameInfo, action: Action):
-    print("1. Shoot opponent\n2. Shoot self\n3. Use cigarette\n4. Use handsaw\n5. Use beer")
+    print("1. Shoot opponent\n2. Shoot self\n3. Use cigarette\n4. Use handsaw\n5. Use beer\n6. Use pills"
+          "\n7. Use magnifying glass")
     move = int(input("What is your move?\n"))
 
     if move == 1:
@@ -37,6 +37,11 @@ def make_move_manual(info: GameInfo, action: Action):
         action.use_handsaw()
     elif move == 5:
         action.use_beer()
+    elif move == 6:
+        action.use_pills()
+    elif move == 7:
+        action.use_magnifying_glass()
+
 
 if __name__ == "__main__":
     delete_command_files()
@@ -87,6 +92,7 @@ if __name__ == "__main__":
 
                 process_num = process_move(p_blue, p_red, game, p_blue_info, p_red_info, b_command_txt)
                 update_game_info(p_red, p_blue, game, p_red_info, p_blue_info)
+                time.sleep(2)
                 if process_num == 1: # No more shells left
                     round_end = True
 
@@ -101,6 +107,7 @@ if __name__ == "__main__":
 
                 process_num = process_move(p_red, p_blue, game, p_red_info, p_blue_info, r_command_txt)
                 update_game_info(p_red, p_blue, game, p_red_info, p_blue_info)
+                time.sleep(2)
 
                 if process_num == 1: # No more shells left
                     round_end = True
