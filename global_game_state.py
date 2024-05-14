@@ -349,6 +349,9 @@ def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info:
             elif line == "use_magnifying_glass":
                 magnifying_glass(p1, game)
 
+            elif line == "use_inverter":
+                inverter(p1, game)
+
             else:
                 print("Invalid command in txt: ", line)
     # Delete txt contents
@@ -404,6 +407,30 @@ def handsaw(p1: Player)->None:
         p1.items.pop(handsaw_index)
     else:
         raise Exception("Player has a damage attribute that is impossible to obtain")
+
+
+def inverter(p1: Player, game: Game)->None:
+    is_turn(p1)
+    has_inverter = False
+
+    # Check that player has inverter
+    for i in range(len(p1.items)):
+        if p1.items[i] == "inverter":
+            p1.items.pop(i)
+            has_inverter = True
+            break
+
+    if not has_inverter:
+        raise Exception(f"{p1.name} does not have inverter.")
+
+    if game.shell_list[game.shell_index] == 1:
+        game.shell_list[game.shell_index] = 0
+
+    elif game.shell_list[game.shell_index] == 0:
+        game.shell_list[game.shell_index] = 1
+
+    else:
+        raise Exception("Invalid shell in chamber.")
 
 
 def pills(p1: Player, game: Game)->None:
