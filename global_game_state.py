@@ -22,7 +22,7 @@ class Player:
     6 - Injection
     7 - Beer
     8 - Handsaw
-    9 - Medicine
+    9 - Pills
 
     --- Public Attributes ---
     shell - List
@@ -111,7 +111,7 @@ def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->Non
     # Distribute items
     num_items = random.randint(1, 3) # Come back if needed
     item_list = ["cigarette", "cell_phone", "magnifying_glass",
-                 "cuffs", "inverter", "injection", "beer", "handsaw", "medicine"]
+                 "cuffs", "inverter", "injection", "beer", "handsaw", "pills"]
 
     # Populate item list
     for i in range(num_items):
@@ -306,27 +306,35 @@ def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info:
     with open(txt_file) as command_file:
         for line in command_file:
             if line == "shoot_opponent":
-                print("shoot opponent processed")
+                # print("shoot opponent processed")
                 fire(p1, p2, game, p1_info, p2_info)
                 if game.shell_index == len(game.shell_list): # No shells left
+                    # print("NO SHELLS LEFT")
                     open(txt_file, 'w').close() # Delete txt contents
                     return 1
 
             elif line == "shoot_self":
-                print("fire self processed")
+                # print("fire self processed")
                 fire(p1, p2, game, p1_info, p2_info, True)
                 if game.shell_index == len(game.shell_list): # No shells left
-                    print("NO SHELLS LEFT")
+                    # print("NO SHELLS LEFT")
                     open(txt_file, 'w').close() # Delete txt contents
                     return 1
 
             elif line == "use_cigarette":
-                print("use cigarette processed")
+                # print("use cigarette processed")
                 cigarette(p1, game)
 
             elif line == "use_handsaw":
-                print("use handsaw processed")
+                # print("use handsaw processed")
                 handsaw(p1)
+
+            elif line == "use_beer":
+                # print("use beer processed")
+                beer(p1, game)
+
+            elif line == "use_pills":
+                pills(p1, game)
 
             else:
                 print("Invalid command in txt: ", line)
@@ -365,6 +373,7 @@ def cigarette(p1: Player, game: Game)->None:
         raise Exception("User does not have cigarette")
 
 def handsaw(p1: Player)->None:
+    is_turn(p1)
     has_handsaw = False
     handsaw_index = -1
     # Check that player has handsaw, pop it
@@ -385,16 +394,49 @@ def handsaw(p1: Player)->None:
 
 
 def pills(p1: Player, game: Game)->None:
+    # A player can not use pills it exceeds max health
     is_turn(p1)
+    has_pill = False
     dice_roll = random.randint(0, 100)
+    # Check that player has pills
+    for i in range(len(p1.items)):
+        if p1.items[i] == "pills":
+            p1.items.pop(i)
+            has_pill = True
+            break
+
+    if not has_pill:
+        raise Exception(f"{p1.name} does not have pills")
+
     if dice_roll <= 40 and (p1.health + 2) <= game.max_health:
         p1.health += 2
-    elif (p1.health + 2) <= game.max_health:
+    elif dice_roll <= 40 and p1.health + 1 <= game.max_health:
+        p1.health += 1
+    elif dice_roll <= 40 and (p1.health + 2) > game.max_health: # Too much health
         pass
     else:
         p1.health -= 1
+    return
+
+def magnifying_glass(p1: Player, game: Game)->None:
+    is_turn(p1)
+    has_magnifying_glass = False
+
+    # Check that player has magnifying glass
+    for i in range(len(p1.items)):
+        if p1.items[i] == "magnifying_glass":
+            has_magnifying_glass = True
+            p1.items.pop(i)
+            break
+
+    if has_magnifying_glass:
+        p1.shell_list[game.shell_index] = game.shell_list[game.shell_index]
+
+    else:
+        raise Exception(f"{p1.name} does not have a magnifying glass.")
 
     return
+
 
 
 def beer(p1: Player, game: Game)->None:
@@ -410,12 +452,11 @@ def beer(p1: Player, game: Game)->None:
 
     # User doesn't have item
     if not has_beer:
-        raise Exception("User does not have beer")
+        raise Exception(f"{p1.name} does not have beer")
 
     # Increment index
     p1.items.pop(beer_index)
     game.shell_index += 1
-
     # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
 
     return
@@ -437,7 +478,7 @@ def injection(p1: Player, p2: Player, steal_item: str)->None:
             break
 
     if not has_injection:
-        raise Exception("User does not have injection")
+        raise Exception(f"{p1.name} does not have injection")
 
     # Check if the opponent has the item
     for i in range(len(p2.items)):
@@ -449,7 +490,7 @@ def injection(p1: Player, p2: Player, steal_item: str)->None:
 
     # Item not found
     if not found_item:
-        raise Exception(f"Opponent does not have '{steal_item}'.")
+        raise Exception(f"{p2.name} does not have '{steal_item}'.")
 
     # Use item
     if steal_item == "injection":
@@ -468,7 +509,7 @@ def injection(p1: Player, p2: Player, steal_item: str)->None:
         pass # Add beer function
     elif steal_item == "handsaw":
         pass # Add handsaw function
-    elif steal_item == "medicine":
+    elif steal_item == "pills":
         pass # Add medicine function
     # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
     return
