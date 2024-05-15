@@ -1,5 +1,6 @@
 import math
 import random
+import time
 
 # Can be used to check if a player has illegally modified
 class Game:
@@ -49,9 +50,13 @@ class Player:
         self.health = health
         self.items = []
         self.my_cuffed = False
-        self.opponent_cuffed = False
+        # self.opponent_cuffed = False
         self.damage = 1
         self.turn = turn
+        # self.cuff_ban = False
+        # self.steal_item = None
+        self.cuff_ban = False # Can not play consecutive cuffs
+
 
 class GameInfo:
     def __init__(self, p1: Player, p2: Player, game: Game):
@@ -74,12 +79,12 @@ class GameInfo:
         self.turn = p1.turn
 
         self.my_cuffed = p1.my_cuffed
-        self.opponent_cuffed = p1.opponent_cuffed
+        self.opponent_cuffed = p2.my_cuffed
 
         self.num_live = -1
         self.num_dud = -1
 
-
+        self.cuff_ban = False # Can not play consecutive cuffs
 
 def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->None:
     game.shell_index = 0
@@ -139,6 +144,13 @@ def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->Non
         game.max_health = max_health
 
     game.shell_list = shell_list
+    p1.my_cuffed = False
+    p1.cuff_ban = False
+
+    p2.my_cuffed = False
+    p2.cuff_ban = False
+
+
 
     return
 
@@ -148,9 +160,15 @@ def change_turn(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo, p2_g
     p1.damage = 1
     p2.damage = 1
 
+    if game.shell_index == len(game.shell_list): # End of round, uncuff
+        p1.my_cuffed = False
+        p2.my_cuffed = False
+
     if p1.turn == True and p2.turn == False:
         if p2.my_cuffed is True: # If p2 is cuffed, repeat turn
             p2.my_cuffed = False
+            p1.cuff_ban = True
+
         else:
             p1.turn = False
             p2.turn = True
@@ -224,6 +242,10 @@ def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fi
 
         change_turn(p1, p2, game, p1_game_info, p2_game_info)
 
+    p2.cuff_ban = False # p1 has had their turn
+
+    time.sleep(2)
+
     return
 
 def update_game_info(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo, p2_game_info:GameInfo):
@@ -259,7 +281,7 @@ def update_game_info(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo,
 
     p1_game_info.my_items = p1.items
     p1_game_info.opponent_items = p2.items
-    p1_game_info.opponent_cuffed = p2.opponent_cuffed
+    p1_game_info.opponent_cuffed = p2.my_cuffed
     p1_game_info.my_cuffed = p1.my_cuffed
     p1_game_info.my_health = p1.health
     p1_game_info.opponent_health = p2.health
@@ -272,7 +294,7 @@ def update_game_info(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo,
 
     p2_game_info.my_items = p2.items
     p2_game_info.opponent_items = p1.items
-    p2_game_info.opponent_cuffed = p1.opponent_cuffed
+    p2_game_info.opponent_cuffed = p1.my_cuffed
     p2_game_info.my_cuffed = p2.my_cuffed
     p2_game_info.my_health = p2.health
     p2_game_info.opponent_health = p1.health
@@ -302,7 +324,7 @@ def print_player_info(p_info: GameInfo):
         else:
             print(p_info.shell_list[i], end=' ')
     print("")
-    print(f"{p_info.num_live} live rounds, {p_info.num_dud} dud rounds")
+    print(f"{p_info.num_live} live rounds, {p_info.num_dud} dud rounds\n")
 
 
 def is_turn(p1: Player):
@@ -351,6 +373,19 @@ def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info:
 
             elif line == "use_inverter":
                 inverter(p1, game)
+
+            elif line == "use_cell_phone":
+                cell_phone(p1, game)
+
+            elif line == "use_cuffs":
+                cuffs(p1, p2)
+
+            elif len(line.split()) == 2: # Two worded line
+                words = line.split()
+                if words[0] == "use_injection":
+                    injection(p1, p2, words[1], game)
+                else:
+                    raise Exception("Injection improperly inputted.")
 
             else:
                 print("Invalid command in txt: ", line)
@@ -500,9 +535,7 @@ def beer(p1: Player, game: Game)->None:
 
     return
 
-
-
-def injection(p1: Player, p2: Player, steal_item: str)->None:
+def injection(p1: Player, p2: Player, steal_item: str, game: Game)->None:
     is_turn(p1)
 
     found_item = False
@@ -526,6 +559,7 @@ def injection(p1: Player, p2: Player, steal_item: str)->None:
             p1.items.pop(injection_index)
             p1.items.append(steal_item)
             found_item = True
+            break
 
     # Item not found
     if not found_item:
@@ -535,22 +569,21 @@ def injection(p1: Player, p2: Player, steal_item: str)->None:
     if steal_item == "injection":
         raise Exception("You may not use injection to steal injection.")
     elif steal_item == "cigarette":
-        pass # Add cigarette function
+        cigarette(p1, game)
     elif steal_item == "cell_phone":
-        pass # Add cell_phone function
+        cell_phone(p1, game)
     elif steal_item == "magnifying_glass":
-        pass # Add magnifying_glass function
+        magnifying_glass(p1, game)
     elif steal_item == "cuffs":
-        pass # Add cuffs function
+        cuffs(p1, p2)
     elif steal_item == "inverter":
-        pass # Add inverter function
+        inverter(p1, game)
     elif steal_item == "beer":
-        pass # Add beer function
+        beer(p1, game)
     elif steal_item == "handsaw":
-        pass # Add handsaw function
+        handsaw(p1)
     elif steal_item == "pills":
-        pass # Add medicine function
-    # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
+        pills(p1, game)
     return
 
 def cell_phone(p1: Player, game: Game) -> None:
@@ -562,6 +595,7 @@ def cell_phone(p1: Player, game: Game) -> None:
         if p1.items[i] == "cell_phone":
             has_celly = True
             p1.items.pop(i)
+            break
 
     if has_celly:
         info_shell = random.randint(b, len(game.shell_list) - 1)
@@ -570,6 +604,30 @@ def cell_phone(p1: Player, game: Game) -> None:
         raise Exception(f"{p1.name} does not have a cell phone.")
 
 
+def cuffs(p1: Player, p2: Player):
+    is_turn(p1)
+    has_cuffs = False
+    cuff_index = -1
+
+    for i in range(len(p1.items)):
+        if p1.items[i] == "cuffs":
+            cuff_index = i
+            has_cuffs = True
+
+    if not has_cuffs:
+        raise Exception(f"{p1.name} does not have cuffs.")
+
+    elif p2.my_cuffed: # Opponent is already cuffed
+        raise Exception(f"{p2.name} is already cuffed")
+
+    elif p1.cuff_ban: # Cannot use consecutive cuffs
+        pass
+
+    else:
+        p1.items.pop(cuff_index)
+        p2.my_cuffed = True
+
+    return
 
 
 

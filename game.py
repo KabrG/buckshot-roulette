@@ -8,7 +8,6 @@ from global_game_state import *
 from player_accessible_functions import *
 # from powerup_functions import *
 
-
 def delete_command_files():
     current_directory = os.getcwd()
     files_in_directory = os.listdir(current_directory)
@@ -21,7 +20,7 @@ def delete_command_files():
 # Practice function for self-play
 def make_move_manual(info: GameInfo, action: Action):
     print("1. Shoot opponent\n2. Shoot self\n3. Use cigarette\n4. Use handsaw\n5. Use beer\n6. Use pills"
-          "\n7. Use magnifying glass")
+          "\n7. Use magnifying glass\n8. Use inverter\n9. Use cell phone\n10. Use cuffs\n11. Use injection")
     move = int(input("What is your move?\n"))
 
     if move == 1:
@@ -41,6 +40,15 @@ def make_move_manual(info: GameInfo, action: Action):
         action.use_pills()
     elif move == 7:
         action.use_magnifying_glass()
+    elif move == 8:
+        action.use_inverter()
+    elif move == 9:
+        action.use_cell_phone()
+    elif move == 10:
+        action.use_cuffs()
+    elif move == 11:
+        steal_item = input("What item do you want to steal?\n")
+        action.use_injection(steal_item)
 
 
 if __name__ == "__main__":
@@ -92,9 +100,9 @@ if __name__ == "__main__":
 
                 process_num = process_move(p_blue, p_red, game, p_blue_info, p_red_info, b_command_txt)
                 update_game_info(p_red, p_blue, game, p_red_info, p_blue_info)
-                time.sleep(2)
                 if process_num == 1: # No more shells left
                     round_end = True
+                    break
 
             if is_winner(p_red, p_blue) != 0:
                 break
@@ -107,10 +115,10 @@ if __name__ == "__main__":
 
                 process_num = process_move(p_red, p_blue, game, p_red_info, p_blue_info, r_command_txt)
                 update_game_info(p_red, p_blue, game, p_red_info, p_blue_info)
-                time.sleep(2)
 
                 if process_num == 1: # No more shells left
                     round_end = True
+                    break
 
             if is_winner(p_red, p_blue) != 0:
                 break

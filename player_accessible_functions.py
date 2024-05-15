@@ -31,7 +31,7 @@ class Action:
         write_to(self.txt_file, "use_beer")
         return
 
-    def use_phone(self)->None:
+    def use_cell_phone(self)->None:
         write_to(self.txt_file, "use_cell_phone")
         return
 
@@ -51,6 +51,17 @@ class Action:
         write_to(self.txt_file, "use_magnifying_glass")
         return
 
+    def use_inverter(self)->None:
+        write_to(self.txt_file, "use_inverter")
+        return
+
+    def use_cuffs(self)->None:
+        write_to(self.txt_file, "use_cuffs")
+        return
+
+    def use_injection(self, steal_item)->None:
+        write_to(self.txt_file, f"use_injection {steal_item}")
+        return
 
 
 
