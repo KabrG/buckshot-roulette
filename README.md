@@ -42,7 +42,7 @@ For example, calling ```action.use_handsaw()``` followed by ```action.shoot_oppo
 **It is the programmer's responsibility to ensure that the actions methods are called correctly**. For example they may not call ```use_cell_phone()``` unless they have a cell phone in their inventory. 
 
 ### All Item Names
-["cigarette", "cell_phone", "magnifying_glass", "cuffs", "inverter", "injection", "beer", "handsaw", "pills"] 
+The list of all avaliable items: ["cigarette", "cell_phone", "magnifying_glass", "cuffs", "inverter", "injection", "beer", "handsaw", "pills"] 
 
 
 
