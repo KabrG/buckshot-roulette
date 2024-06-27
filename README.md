@@ -15,7 +15,7 @@ The programmer is responsible for designing a ```make_move()``` function that wi
 | ```shell_index: int``` | Index represents current shell chambered in the shotgun. For example, if `shell_index` is 0, the first shell in shell_list will be fired next. | 
 | ```num_live: int``` ```num_dud: int``` | The number of live and dud rounds announced at the beginning of the round.| 
 | ```my_health: int``` ```opponent_health: int``` | Health of both players respectively.| 
-| ```my_items: list``` ```opponent_health: list``` | Item list of both players respectively.| 
+| ```my_items: list``` ```opponent_items: list``` | Item list of both players respectively.| 
 | ```my_damage: int``` ```opponent_damage: int``` | The amount of damage player or their opponent can deal in the next shot. Note, ```opponent_damage``` will always be visibly 1.| 
 | ```max_health: int```| Max health either player can reach this game. This is important when consuming cigarettes as you can not exceed ```max_health```.| 
 | ```turn: bool```|Returns if it is player's turn (always give ```True``` since ```make_move()``` is called only on your turn).| 
