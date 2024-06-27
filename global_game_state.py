@@ -2,12 +2,15 @@ import math
 import random
 import time
 
+
 # Can be used to check if a player has illegally modified
 class Game:
     def __init__(self, shell_list: list, max_health: int, shell_index: int):
         self.shell_list = shell_list
         self.max_health = max_health
         self.shell_index = shell_index
+        self.inverter_used = False
+        self.sound_enabled = False
         # Potentially holds a copy of both player objects?
 
 class Player:
@@ -87,6 +90,7 @@ class GameInfo:
         self.cuff_ban = False # Can not play consecutive cuffs
 
 def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->None:
+
     game.shell_index = 0
     total_shell = random.randint(2, 8)
     shell_list = []
@@ -117,7 +121,7 @@ def initialize_game(p1: Player, p2: Player, game: Game, first_round = True)->Non
     # Distribute items
     num_items = random.randint(1, 3) # Come back if needed
     item_list = ["cigarette", "cell_phone", "magnifying_glass",
-                 "cuffs", "inverter", "injection", "beer", "handsaw", "pills"]
+     "cuffs", "inverter", "injection", "beer", "handsaw", "pills"]
 
     # Populate item list
     for i in range(num_items):
@@ -191,12 +195,24 @@ def is_winner(p1: Player, p2: Player):
     # Check for winner
     if p1.health <= 0:
         print(f"{p2.name} wins")
+        exit()
         return 2
     elif p2.health <= 0:
         print(f"{p1.name} wins")
+        exit()
         return 1
 
     return 0
+
+def revert_inverter(game: Game):
+    if game.inverter_used:
+        if game.shell_list[game.shell_index] == 1:
+            game.shell_list[game.shell_index] = 0
+            game.inverter_used = False
+        else:
+            game.shell_list[game.shell_index] = 1
+            game.inverter_used = False
+
 
 def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fire=False):
     shell = game.shell_list
@@ -213,14 +229,16 @@ def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fi
     if self_fire:
         if shot_fired == 0:
             # Shell is ejected, it is still p1's turn
+            revert_inverter(game)
             game.shell_index += 1
-            print("You shot yourself and it wasn't loaded!")
+            print(f"{p1.name} shot themselves and it wasn't loaded.")
 
         elif shot_fired == 1: # p1 shot themselves
             p1.health -= p1.damage
+            revert_inverter(game)
             game.shell_index += 1
+            print(f"{p1.name} shot themselves and it was loaded.")
             change_turn(p1, p2, game, p1_game_info, p2_game_info)
-            print("You shot yourself and it was loaded!")
 
 
         else:
@@ -229,13 +247,15 @@ def fire(p1: Player, p2: Player, game: Game, p1_game_info, p2_game_info, self_fi
     # Case 2: p1 shoots p2
     else:
         if shot_fired == 0: # Dud round
+            revert_inverter(game)
             game.shell_index += 1
-            print("You shot opponent and it wasn't loaded!")
+            print(f"{p1.name} shot {p2.name} and it wasn't loaded.")
 
         elif shot_fired == 1: # Real round
             p2.health -= p1.damage
+            revert_inverter(game)
             game.shell_index += 1
-            print("You shot opponent and it was loaded!")
+            print(f"{p1.name} shot {p2.name} and it was loaded.")
 
         else:
             raise Exception(f"{shot_fired} is an invalid shell in chamber")
@@ -304,7 +324,7 @@ def update_game_info(p1: Player, p2: Player, game: Game, p1_game_info: GameInfo,
     p2_game_info.name = p2.name
 
 
-def print_player_info(p_info: GameInfo):
+def print_player_info(p_info: GameInfo, blurred = False):
     for i in range(20):
         print("\n")
     print(p_info.name, "stats:")
@@ -312,17 +332,30 @@ def print_player_info(p_info: GameInfo):
     print("Opponent Health:", p_info.opponent_health)
     print("My Items:", p_info.my_items)
     print("Opponent Items:", p_info.opponent_items)
-    print("My Cuffed Status:", p_info.my_cuffed)
+    # print("My Cuffed Status:", p_info.my_cuffed)
     print("Opponent Cuffed Status:", p_info.opponent_cuffed)
-    print("My Turn:", p_info.turn)
+    print("Cuff Ban:", p_info.cuff_ban)
+    # print("My Turn:", p_info.turn)
     print("My damage:", p_info.my_damage)
-    print("Opponent Damage:", p_info.opponent_damage)
-    print("Perceived Shells:", end=' ')
-    for i in range(len(p_info.shell_list)):
-        if i == p_info.shell_index:
-            print("|", p_info.shell_list[i], "|", end=' ', sep='')
-        else:
-            print(p_info.shell_list[i], end=' ')
+    # print("Opponent Damage:", p_info.opponent_damage)
+    if not blurred:
+        print("Perceived Shells:", end=' ')
+        for i in range(len(p_info.shell_list)):
+            if i == p_info.shell_index:
+                print("|", p_info.shell_list[i], "|", end=' ', sep='')
+            else:
+                print(p_info.shell_list[i], end=' ')
+    else: # Blurred version
+        print("Blurred Shells:", end=' ')
+        for i in range(len(p_info.shell_list)):
+            if i == p_info.shell_index:
+                print("|", 2, "|", end=' ', sep='')
+            elif i > p_info.shell_index:
+                print(2, end=' ')
+
+            else:
+                print(p_info.shell_list[i], end=' ')
+
     print("")
     print(f"{p_info.num_live} live rounds, {p_info.num_dud} dud rounds\n")
 
@@ -337,6 +370,7 @@ def is_turn(p1: Player):
 def process_move(p1: Player, p2: Player, game: Game, p1_info: GameInfo, p2_info: GameInfo, txt_file: str):
     with open(txt_file) as command_file:
         for line in command_file:
+            line = line.strip()
             if line == "shoot_opponent":
                 # print("shoot opponent processed")
                 fire(p1, p2, game, p1_info, p2_info)
@@ -453,6 +487,7 @@ def inverter(p1: Player, game: Game)->None:
         if p1.items[i] == "inverter":
             p1.items.pop(i)
             has_inverter = True
+            game.inverter_used = True
             break
 
     if not has_inverter:
@@ -530,6 +565,7 @@ def beer(p1: Player, game: Game)->None:
 
     # Increment index
     p1.items.pop(beer_index)
+    revert_inverter(game)
     game.shell_index += 1
     # UPDATE GAME INFO FUNCTION (updates p1 and p2 items and known rounds)
 
