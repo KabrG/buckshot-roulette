@@ -196,11 +196,11 @@ def is_winner(p1: Player, p2: Player):
     if p1.health <= 0:
         print(f"{p2.name} wins")
         exit()
-        return 2
+        # return 2
     elif p2.health <= 0:
         print(f"{p1.name} wins")
         exit()
-        return 1
+        # return 1
 
     return 0
 

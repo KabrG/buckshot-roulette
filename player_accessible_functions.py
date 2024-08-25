@@ -2,6 +2,7 @@
 def write_to(file, msg):
     f = open(file, "a")
     f.write(msg)
+    f.write("\n")
     f.close()
 
 class Action:
@@ -21,18 +22,22 @@ class Action:
 
     def use_cigarette(self)->None:
         write_to(self.txt_file, "use_cigarette")
+        print("Using cigarettes...")
         return
 
     def use_pills(self)->None:
         write_to(self.txt_file, "use_pills")
+        print("Using pills...")
         return
 
     def use_beer(self)->None:
         write_to(self.txt_file, "use_beer")
+        print("Using beer...")
         return
 
     def use_cell_phone(self)->None:
         write_to(self.txt_file, "use_cell_phone")
+        print("Using cell phone...")
         return
 
     def shoot_self(self)->None:
@@ -45,22 +50,27 @@ class Action:
 
     def use_handsaw(self)->None:
         write_to(self.txt_file, "use_handsaw")
+        print("Using handsaw...")
         return
 
     def use_magnifying_glass(self)->None:
         write_to(self.txt_file, "use_magnifying_glass")
+        print("Using magnifying glass...")
         return
 
     def use_inverter(self)->None:
         write_to(self.txt_file, "use_inverter")
+        print("Using inverter...")
         return
 
     def use_cuffs(self)->None:
         write_to(self.txt_file, "use_cuffs")
+        print("Using cuffs...")
         return
 
     def use_injection(self, steal_item)->None:
         write_to(self.txt_file, f"use_injection {steal_item}")
+        print(f"Using injection to steal {steal_item}...")
         return
 
 
