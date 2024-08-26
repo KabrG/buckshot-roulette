@@ -49,5 +49,5 @@ If you'd like to run the game with a simple command in the terminal, use an alia
 ```
 alias buckshot='<ABSOLUTE_PATH_TO_REPO>/.venv/bin/python3.11 <ABSOLUTE_PATH_TO_REPO>/game.py'
 ```
-lets you run the program by typing `buckshot` in terminal.
+lets you run the program by typing `buckshot` in terminal. Add this line into `~/.bashrc`.
 
