@@ -44,6 +44,10 @@ For example, calling ```action.use_handsaw()``` followed by ```action.shoot_oppo
 ### All Item Names
 The list of all avaliable items: ["cigarette", "cell_phone", "magnifying_glass", "cuffs", "inverter", "injection", "beer", "handsaw", "pills"] 
 
-
-
+## Extra
+If you'd like to run the game with a simple command in the terminal, use an alias. For example,
+```
+alias buckshot='<ABSOLUTE_PATH_TO_REPO>/.venv/bin/python3.11 <ABSOLUTE_PATH_TO_REPO>/game.py'
+```
+lets you run the program by typing `buckshot` in terminal.
 
