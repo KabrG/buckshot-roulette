@@ -68,8 +68,8 @@ def make_move_manual(info: GameInfo, action: Action):
 if __name__ == "__main__":
     delete_command_files()
 
-    p_blue = Player("Yash", 1, False)
-    p_red = Player("Evil AI Kabir", 1, False)
+    p_blue = Player("You", 1, False)
+    p_red = Player("Evil AI", 1, False)
 
     # Generate random unique command files
     b_command_txt = "command" + str(random.randint(0, 9999999998)) + ".txt"
