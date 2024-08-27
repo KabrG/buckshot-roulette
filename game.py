@@ -9,16 +9,25 @@ from player_accessible_functions import *
 from kabr_ai import kabr_simple_ai, update_shell_list
 # from powerup_functions import *
 
+import atexit
+
+def exit_handler():
+    delete_command_files()
+
+atexit.register(exit_handler)
+
+
 def delete_command_files():
     current_directory = os.getcwd()
     files_in_directory = os.listdir(current_directory)
 
     for file_name in files_in_directory:
-        if file_name.startswith("command"):
+        if file_name.startswith("buckshot-command"):
             file_path = os.path.join(current_directory, file_name)
             os.remove(file_path)
 
-def has_item(arr, item)->bool:
+
+def has_item(arr, item) -> bool:
     for i in range(len(arr)):
         if arr[i] == item:
             return True
@@ -72,12 +81,12 @@ if __name__ == "__main__":
     p_red = Player("Evil AI", 1, False)
 
     # Generate random unique command files
-    b_command_txt = "command" + str(random.randint(0, 9999999998)) + ".txt"
-    r_command_txt = "command" + str(random.randint(0, 9999999998)) + ".txt"
+    b_command_txt = "buckshot-command" + str(random.randint(0, 9999999998)) + ".txt"
+    r_command_txt = "buckshot-command" + str(random.randint(0, 9999999998)) + ".txt"
 
     while b_command_txt == r_command_txt:
-        b_command_txt = "command" + str(random.randint(0, 9999999998)) + ".txt"
-        r_command_txt = "command" + str(random.randint(0, 9999999998)) + ".txt"
+        b_command_txt = "buckshot-command" + str(random.randint(0, 9999999998)) + ".txt"
+        r_command_txt = "buckshot-command" + str(random.randint(0, 9999999998)) + ".txt"
 
     # Make the files
     with open(b_command_txt, 'w') as file_b:
